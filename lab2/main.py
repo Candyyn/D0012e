@@ -47,11 +47,69 @@ def incremental(elements):
         else:
             return tuple(smallestlist)
 
+# median of medians algorithm for finding the 3 smallest elems
+def MoM(elements, k):
+
+    # make chunks of 5 elements, 5 because it's the lowest amount of elements while still being odd and linear
+    chunks = []
+    for i in range(0, len(elements), 5):
+        chunks = chunks + [elements[i:i+5]]
+    
+    # sort chunks
+    chunks = [sorted(chunk) for chunk in chunks]
+
+    # now get medians (middle element) of each sorted chunk
+    medians = [chunk[len(chunk) // 2] for chunk in chunks]
+
+    # sort the medians and then find the median of the medians (our pivot)
+    piv = sorted(medians)[len(medians) // 2]
+
+    # quicksort with out chosen pivot, and use what rank it received in the end
+    rank = QS(elements, piv)
+
+    # check if the rank is the targeted rank if so return
+    if rank == k:
+        return piv
+    # if the targeted rank is smaller find new pivot in the half below our pivot and quicksort again
+    elif k < rank:
+        return MoM(elements[0:rank], k)
+    # if the targeted rank is greater find new pivot in the half above our pivot and quicksort again
+    else:
+        return MoM(elements[rank+1:len(elements)], k - rank - 1)
+
+# quicksort
+def QS(elements, piv):
+    # make pointers for left, right and current position
+    left = 0
+    right = len(elements)-1
+    i = 0
+    
+    # loop til left and right pointer connect
+    while left < right:
+        # if we find the pivot there is no need to swap places
+        if elements[i] == piv:
+            i = i+1
+        # if the element at the current pointer is smaller than the pivot we swap them
+        # this won't acutally do anything until we've found our pivot as the current pointer is traveling with the left pointer to begin with
+        elif elements[i] < piv:
+            elements[left], elements[i] = elements[i], elements[left]
+            left += 1
+            i += 1
+        # if the element at the current pointer is larger than the pivot we swap with the right pointer
+        else:
+            elements[right], elements[i] = elements[i], elements[right]
+            right -= 1
+    return left
+
+# smallest 3 divide and conquer
+def S3DC(elements):
+    return (MoM(elements, 0),MoM(elements, 1),MoM(elements, 2))
 
 if __name__ == '__main__':
     randomlist = []
-    for i in range(0, 40):
+    for i in range(0, 10):
         n = random.randint(1, 100)
         randomlist.append(n)
     print(randomlist)
-    print(incremental(randomlist))
+    print("Incremental > ", incremental(randomlist))
+    print("Div and Conq > ", S3DC(randomlist))
