@@ -6,9 +6,8 @@
 # that n=3×2k31 for some positive integer k. Hint: One can use the induction technique
 # to show the correctness. Check Chapter 4 for more examples of performance analyses.
 
-
 import random
-
+import time
 
 def incremental(elements):
     smallestlist = []  # list that will hold the 3 smallest elements
@@ -21,8 +20,7 @@ def incremental(elements):
             if biggestsmallest is None or biggestsmallest < elements[i]:
                 biggestsmallest = elements[i]  # set biggest element
 
-        elif biggestsmallest > elements[
-            i]:  # if an element smaller than the biggest element in our set of 3 we need to swap
+        elif biggestsmallest > elements[i]:  # if an element smaller than the biggest element in our set of 3 we need to swap
             biggestsmallest = elements[i]  # prematurely set the biggest element to the new one
 
             for j in range(0,
@@ -31,98 +29,89 @@ def incremental(elements):
                 if smallestlist[j] > biggestsmallest:
                     biggestsmallest, smallestlist[j] = smallestlist[j], biggestsmallest
 
-    if smallestlist[0] > smallestlist[1]:
-        if smallestlist[1] > smallestlist[2]:
-            return smallestlist[2], smallestlist[1], smallestlist[0]
+    for i in range(0,2):
+        if smallestlist[i] > smallestlist[i+1]:
+            smallestlist[i], smallestlist[i+1] = smallestlist[i+1], smallestlist[i]
+
+    return tuple(smallestlist)
+
+# Median of medians algorithm, used to find the median in a list in worst case linear time
+def MoM(elements):
+
+
+    # if elements are less than 5 we just take the median
+    if len(elements) < 5:
+        elements = sorted(elements)
+        return elements[len(elements)//2]
+
+    # divide the elements into chunks of 5, 5 because it's the smallest odd number that allows for linear worst case
+    chunks = []
+    for i in range(0, len(elements), 5):
+        chunks = chunks + [elements[i:i+5]]
+
+    # sort the chunks of 5 elements
+    chunks = [sorted(chunk) for chunk in chunks]
+
+    # get the medians of those chunks, if a non-full chunk reaches the middle of the rest of the medians we use it otherwise we scrap
+    medians = []
+    for i in range(0,len(chunks)):
+        if len(chunks[i]) >= 3:
+            medians.append(chunks[i][2])
+
+    # call median of medians recursively til base case
+    return MoM(medians)
+
+# Quickselect, used to find the "k"th smallest element
+def QS(elements, k):
+    # find a good pivot with median of medians algorithm
+    piv = MoM(elements)
+
+    # make pointers for left, right and current position
+    left = 0
+    right = len(elements)-1
+    i = 0
+
+    # progress the left and right pointer towards eachother
+    while left < right:
+        # if we find the pivot there is no need to swap places, just progress current pointer to be ahead of the left
+        if elements[i] == piv:
+            i = i+1
+        # if the element at the current pointer is smaller than the pivot we swap them
+        # this won't acutally do anything until we've found our pivot as the current pointer is traveling with the left pointer to begin with
+        elif elements[i] < piv:
+            elements[left], elements[i] = elements[i], elements[left]
+            left += 1
+            i += 1
+        # if the element at the current pointer is larger than the pivot we swap with the right pointer
         else:
-            return smallestlist[1], smallestlist[0], smallestlist[2]
-    elif smallestlist[1] > smallestlist[2]:
-        if smallestlist[2] > smallestlist[0]:
-            return smallestlist[0], smallestlist[2], smallestlist[1]
-        else:
-            return smallestlist[2], smallestlist[0], smallestlist[1]
-    elif smallestlist[2] > smallestlist[0]:
-        if smallestlist[0] > smallestlist[1]:
-            return smallestlist[1], smallestlist[0], smallestlist[2]
-        else:
-            return tuple(smallestlist)
+            elements[right], elements[i] = elements[i], elements[right]
+            right -= 1
 
-
-# Divide and Conquer
-
-def divideAndConquer(elements):
-    length = len(elements)
-    if length == 1:  # base case since a list of one element is sorted
-        return elements
-    mid = length // 2
-    left = divideAndConquer(elements[:mid])
-    right = divideAndConquer(elements[mid:])
-    ret = []
-    max_value = length if length < 3 else 3
-    while len(ret) < max_value and left and right:
-        if left[0] < right[0]:
-            ret.append(left[0])
-            del left[0]
-        else:
-            ret.append(right[0])
-            del right[0]
-    if len(ret) < max_value:
-        ret.extend(left)
-        ret.extend(right)
-
-    return ret
-
-
-#
-# Given an array A=a1,a2,···,an of non-zero real numbers, the problem is to find a
-# subarray ai,ai+1,···,aj  (of consecutive elements) such that the sum of all the numbers
-# in this subarray is maximum over all possible consecutive subarrays. Design a divide and
-# conquer algorithm to compute such a maximum sum. You do not need to actually output
-# such a subarray; only returning the maximum sum. Write only one recursive function to
-# implement your algorithm. Built-in functions or methods for strings or lists must not be
-# used. Your algorithm should run in O(n)time in the worst case. You may assume that
-# n=2k for some positive integer k.
-#
-
-"""
-    
-
-"""
-def maxSubArray(lst):
-    if len(lst) == 1:
-        return lst[0]
-
-    mid = len(lst) // 2
-
-    left = maxSubArray(lst[:mid])
-    right = maxSubArray(lst[mid:])
-
-    left_index = 1
-    right_index = 0
-    left_center = 0
-    right_center = 0
-    while left_index <= mid and lst[mid - left_index] > 0:
-        left_center = left_center + lst[mid - left_index]
-        left_index += 1
-    while right_index < mid and lst[mid + right_index] > 0:
-        right_center = right_center + lst[mid + right_index]
-        right_index += 1
-    center_sum = right_center + left_center
-    if center_sum > right and center_sum > left:
-        return center_sum
-    elif right > left:
-        return right
+    # left/right is going to be the index position our pivot received after the quickselect algorithm
+    # if the rank of the pivot is the "k"th element we return that value
+    if k == left:
+        return elements[left]
+    # if the "k"th element is ranked lower than left we call recursion on the left side of our elements
+    elif k < left:
+        return QS(elements[0:left], k)
+    # if the "k"th element is ranked higher than left we call recursion on the right side of our elements
+    # we also need to take the "k"th place into mind when we choose from this side is the ranks under it are now gone
     else:
-        return left
+        return QS(elements[left+1:len(elements)], k - left - 1)
 
+# smallest 3 divide and conquer
+def S3DC(elements):
+    return (QS(elements, 0), QS(elements, 1), QS(elements, 2))
 
 if __name__ == '__main__':
     randomlist = []
-    for i in range(0, 40):
-        n = random.randint(1, 100)
+    amountofelems = 1000
+    for i in range(0, amountofelems):
+        n = random.randint(1, amountofelems*10)
         randomlist.append(n)
-
-    print(randomlist)
-    print(incremental(randomlist))
-    print(tuple(divideAndConquer(randomlist)))
-    print(maxSubArray(randomlist))
+    start_time = time.time()
+    print("Incremental > ", incremental(randomlist))
+    print("it took: ", (time.time()-start_time), "seconds for incr")
+    start_time = time.time()
+    print("Div and Conq > ", S3DC(randomlist))
+    print("it took: ", (time.time()-start_time), "seconds for div")
