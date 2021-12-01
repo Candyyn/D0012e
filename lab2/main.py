@@ -38,38 +38,32 @@ def incremental(elements):
 # Median of medians algorithm, used to find the median in a list in worst case linear time
 def MoM(elements):
 
+    chunks = []
 
     # if elements are less than 5 we just take the median
-    if len(elements) < 5:
+    if len(elements) <= 5:
         elements = sorted(elements)
         return elements[len(elements)//2]
 
     # divide the elements into chunks of 5, 5 because it's the smallest odd number that allows for linear worst case
-    chunks = []
     for i in range(0, len(elements), 5):
-        chunks = chunks + [elements[i:i+5]]
+        # we call recursion to sort since our base case is for elements <= 5
+        chunk = elements[i:i+5]
+        if len(chunk) == 5:
+            if len(chunk) != 0:
+                medians = [MoM(chunk)]
 
-    # sort the chunks of 5 elements
-    chunks = [sorted(chunk) for chunk in chunks]
-
-    # get the medians of those chunks, if a non-full chunk reaches the middle of the rest of the medians we use it otherwise we scrap
-    medians = []
-    for i in range(0,len(chunks)):
-        if len(chunks[i]) >= 3:
-            medians.append(chunks[i][2])
-
-    # call median of medians recursively til base case
+    # call median of medians recursively til base case'''
     return MoM(medians)
 
-# Quickselect, used to find the "k"th smallest element
+# Quickselect, used to find the 3 smallest elements only
 def QS(elements, k):
     # find a good pivot with median of medians algorithm
     piv = MoM(elements)
     
     # make pointers for left, right and current position
-    left = 0
+    i = left = 0
     right = len(elements)-1
-    i = 0
 
     # progress the left and right pointer towards eachother
     while left < right:
@@ -88,30 +82,41 @@ def QS(elements, k):
             right -= 1
 
     # left/right is going to be the index position our pivot received after the quickselect algorithm
-    # if the rank of the pivot is the "k"th element we return that value
+    # if the rank of the pivot is the withing the ranks 1-3 we return our 
     if k == left:
-        return elements[left]
+        return tuple(sorted(elements[:k]))
     # if the "k"th element is ranked lower than left we call recursion on the left side of our elements
     elif k < left:
         return QS(elements[0:left], k)
     # if the "k"th element is ranked higher than left we call recursion on the right side of our elements
     # we also need to take the "k"th place into mind when we choose from this side is the ranks under it are now gone
     else:
-        return QS(elements[left+1:len(elements)], k - left - 1)
+        if k >= i:
+            return tuple(sorted(elements[:k]))
+        return QS(elements[left:len(elements)], k - left)
 
-# smallest 3 divide and conquer
-def S3DC(elements):
-    return (QS(elements, 0), QS(elements, 1), QS(elements, 2))
 
 if __name__ == '__main__':
     randomlist = []
-    amountofelems = 1000
+    amountofelems = 3*2**10 # assuming n = 3*2^k as in the lab spec
+    randomlist = random.sample(range(0, amountofelems*10), amountofelems)
+
+    randomlist2 = []
+    amountofelems = 2**4
     for i in range(0, amountofelems):
-        n = random.randint(1, amountofelems*10)
-        randomlist.append(n)
+        n = random.randint(-amountofelems*10, amountofelems*10)
+        randomlist2.append(n)
+
+    #print(randomlist)
     start_time = time.time()
     print("Incremental > ", incremental(randomlist))
     print("it took: ", (time.time()-start_time), "seconds for incr")
+
     start_time = time.time()
-    print("Div and Conq > ", S3DC(randomlist))
-    print("it took: ", (time.time()-start_time), "seconds for div")
+    print("Div and Conq qs > ", QS(randomlist, 3))
+    print("it took: ", (time.time()-start_time), "seconds for qs")
+
+    '''print(randomlist2)
+    start_time = time.time()
+    print(maxSubArrSum(randomlist2))
+    print("it took: ", (time.time()-start_time), "seconds for max sum")'''
