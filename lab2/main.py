@@ -8,6 +8,7 @@
 
 import random
 import time
+import matplotlib.pyplot as plt
 
 
 def incremental(elements):
@@ -37,22 +38,58 @@ def incremental(elements):
     return tuple(smallestlist)
 
 
+def default_mergeSort(arr):
+    if len(arr) > 1:  # If the array is bigger then 1
+        mid = len(arr) // 2  # Find the middle element
+        left = arr[:mid]  # Get the left half
+        right = arr[mid:]  # Get the right half
+
+        default_mergeSort(left)  # Sort the left half
+
+        default_mergeSort(right)  # Sort the right half
+
+        i = j = k = 0  # Initialize the indexes
+
+        while i < len(left) and j < len(right):
+            if left[i] < right[j]:  # If the left element is smaller then the right
+                arr[k] = left[i]  # Insert the left element
+                i += 1  # Increment the left index
+            else:
+                arr[k] = right[j]  # Insert the right element
+                j += 1  # Increment the right index
+            k += 1  # Increment the index
+
+        while i < len(left):
+            arr[k] = left[i]  # Insert the left elements
+            i += 1  # Increment the left index
+            k += 1  # Increment the index
+
+        while j < len(right):
+            arr[k] = right[j]  # Insert the right elements
+            j += 1  # Increment the right index
+            k += 1  # Increment the index
+    return arr  # Return the sorted array
+
+
 # Median of medians algorithm, used to find the median in a list in worst case linear time
 def MoM(elements):
     chunks = []
 
     # if elements are less than 5 we just take the median
     if len(elements) <= 5:
-        elements = sorted(elements)
+        elements = default_mergeSort(elements)
         return elements[len(elements) // 2]
 
+    medians = []
     # divide the elements into chunks of 5, 5 because it's the smallest odd number that allows for linear worst case
     for i in range(0, len(elements), 5):
         # we call recursion to sort since our base case is for elements <= 5
         chunk = elements[i:i + 5]
+        median = -1
         if len(chunk) == 5:
             if len(chunk) != 0:
-                medians = [MoM(chunk)]
+                median = MoM(chunk)
+        medians = medians + [median]
 
     # call median of medians recursively til base case'''
     return MoM(medians)
@@ -128,6 +165,7 @@ def QS(elements, k):
 # implement your algorithm. Built-in functions or methods for strings or lists must not be
 # used. Your algorithm should run in O(n)time in the worst case. You may assume that
 # n=2k for some positive integer k.
+
 def max_subarray(A, i, j):
     # base case
     if i == j:
@@ -135,7 +173,6 @@ def max_subarray(A, i, j):
 
     # find the middle of the array
     mid = (i + j) // 2
-
     # find the maximum sum of the left subarray
     max_left = max_subarray(A, i, mid)
 
@@ -158,7 +195,7 @@ def max_crossing_subarray(A, i, mid, j):
     for k in range(mid, i - 1, -1):
         # add the current element to the sum
         sum += A[k]
-        # if the sum is greater than the current max left we update it
+        # if thpdate it
         if sum > max_left:
             # update the max left
             max_left = sum
@@ -180,9 +217,43 @@ def max_crossing_subarray(A, i, mid, j):
 
 
 if __name__ == '__main__':
-    randomlist = []
-    amountofelems = 3 * 2 ** 10  # assuming n = 3*2^k as in the lab spec
-    randomlist = random.sample(range(0, amountofelems * 10), amountofelems)
+
+    x1 = []
+    y1 = []
+
+    x2 = []
+    y2 = []
+
+    amountofTest = 14
+    for i in range(1, amountofTest):
+        print(i)
+        randomlist = []
+        amountofelems = 3 * 2 ** i  # assuming n = 3*2^k as in the lab spec
+        randomlist = random.sample(range(0, amountofelems * 10), amountofelems)
+        start_time = time.time()
+        print(incremental(randomlist))
+        y1.append(time.time() - start_time)
+        x1.append(amountofelems)
+
+        start_time = time.time()
+        print(QS(randomlist, 3))
+        y2.append(time.time() - start_time)
+        x2.append(amountofelems)
+
+    ax = plt.axes()
+    ax.plot(x1, y1, label="Incremental")
+    ax.plot(x2, y2, label="Div and Conq qs")
+
+    # naming the x axis
+    plt.xlabel('Length of list')
+    # naming the y axis
+    plt.ylabel('Time (s)')
+
+    # giving a title to my graph
+    plt.title('Find the 3 Smallest Value (Incremental)')
+    plt.legend()
+    # function to show the plot
+    plt.show()
 
     randomlist2 = []
     amountofelems = 2 ** 4
@@ -190,22 +261,4 @@ if __name__ == '__main__':
         n = random.randint(-amountofelems * 10, amountofelems * 10)
         randomlist2.append(n)
 
-    # print(randomlist)
-    start_time = time.time()
-    print("Incremental > ", incremental(randomlist))
-    print("it took: ", (time.time() - start_time), "seconds for incr")
-
-    start_time = time.time()
-    print("Div and Conq qs > ", QS(randomlist, 3))
-    print("it took: ", (time.time() - start_time), "seconds for qs")
-
-
-    test = [2,7,-4,2,1,1]
-    # test max subarray
-    print(max_subarray(test, 0, len(test) - 1))
-
-
-    '''print(randomlist2)
-    start_time = time.time()
-    print(maxSubArrSum(randomlist2))
-    print("it took: ", (time.time()-start_time), "seconds for max sum")'''
+    print(max_subarray(randomlist2, 0, len(randomlist2) - 1))
