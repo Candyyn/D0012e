@@ -1,122 +1,184 @@
+import random
+
+
+####################################################################################################
+####################################################################################################
 # Given n (n >= 3) distinct elements, design two algorithms to compute the first three smallest
 # elements using an incremental and a divide-and-conquer approach, respectively. Both your
-# algorithms should return a triple (x,y,z) such that x<y<z<(the rest n3input
-# elements)and run in linear time in the worst case. Show that your algorithms are correct
+# algorithms should return a triple (x,y,z) such that x < y < z < (the rest n-3 input
+# elements) and run in linear time in the worst case. Show that your algorithms are correct
 # and calculate the exact number of comparisons used by the algorithms. You may assume
 # that n=3×2k31 for some positive integer k. Hint: One can use the induction technique
 # to show the correctness. Check Chapter 4 for more examples of performance analyses.
-
-import random
-import time
+####################################################################################################
+####################################################################################################
 
 def incremental(elements):
     smallestlist = []  # list that will hold the 3 smallest elements
     biggestsmallest = None  # the biggest of the 3 smallest elements
-
-    for i in range(0, len(elements)):  # step through the list incrementally
-
+    for i in range(0, len(elements)):
+        increment()
         if len(smallestlist) < 3:  # fill up the list to begin with
             smallestlist.append(elements[i])
+            increment()
             if biggestsmallest is None or biggestsmallest < elements[i]:
                 biggestsmallest = elements[i]  # set biggest element
+        elif biggestsmallest > elements[i]:  # if an element smaller than the biggest element in our set of 3 we need
+            # to swap
+            increment()
 
-        elif biggestsmallest > elements[i]:  # if an element smaller than the biggest element in our set of 3 we need to swap
+        elif biggestsmallest > elements[
+            i]:  # if an element smaller than the biggest element in our set of 3 we need to swap
             biggestsmallest = elements[i]  # prematurely set the biggest element to the new one
 
             for j in range(0,
                            len(smallestlist)):  # step through the smallest element list to find which value needs to go
 
+                # 3*(n-3)
+                increment()
                 if smallestlist[j] > biggestsmallest:
                     biggestsmallest, smallestlist[j] = smallestlist[j], biggestsmallest
-    
-    for i in range(0,2):
-        if smallestlist[i] > smallestlist[i+1]:
-            smallestlist[i], smallestlist[i+1] = smallestlist[i+1], smallestlist[i]
+
+    for i in range(0, 2):  # +3
+        increment()
+        if smallestlist[i] > smallestlist[i + 1]:
+            smallestlist[i], smallestlist[i + 1] = smallestlist[i + 1], smallestlist[i]
 
     return tuple(smallestlist)
 
-# Median of medians algorithm, used to find the median in a list in worst case linear time
-def MoM(elements):
 
-    chunks = []
+def divnconq(elements, k=3):
+    increment()
+    if len(elements) < k:  # +1
+        return elements
 
-    # if elements are less than 5 we just take the median
-    if len(elements) <= 5:
-        elements = sorted(elements)
-        return elements[len(elements)//2]
+    left = divnconq(elements[:len(elements) // 2], k)  # +T(n//2)
+    right = divnconq(elements[len(elements) // 2:], k)  # +T(n//2)
+    smallestelems = incremental(left + right)  # F(n)
 
-    # divide the elements into chunks of 5, 5 because it's the smallest odd number that allows for linear worst case
-    for i in range(0, len(elements), 5):
-        # we call recursion to sort since our base case is for elements <= 5
-        chunk = elements[i:i+5]
-        if len(chunk) == 5:
-            if len(chunk) != 0:
-                medians = [MoM(chunk)]
+    return incremental(smallestelems)
 
-    # call median of medians recursively til base case'''
-    return MoM(medians)
 
-# Quickselect, used to find the 3 smallest elements only
-def QS(elements, k):
-    # find a good pivot with median of medians algorithm
-    piv = MoM(elements)
-    
-    # make pointers for left, right and current position
-    i = left = 0
-    right = len(elements)-1
+COUNT = 0
 
-    # progress the left and right pointer towards eachother
-    while left < right:
-        # if we find the pivot there is no need to swap places, just progress current pointer to be ahead of the left
-        if elements[i] == piv:
-            i = i+1
-        # if the element at the current pointer is smaller than the pivot we swap them
-        # this won't acutally do anything until we've found our pivot as the current pointer is traveling with the left pointer to begin with
-        elif elements[i] < piv:
-            elements[left], elements[i] = elements[i], elements[left]
-            left += 1
-            i += 1
-        # if the element at the current pointer is larger than the pivot we swap with the right pointer
-        else:
-            elements[right], elements[i] = elements[i], elements[right]
-            right -= 1
 
-    # left/right is going to be the index position our pivot received after the quickselect algorithm
-    # if the rank of the pivot is the withing the ranks 1-3 we return our 
-    if k == left:
-        return tuple(sorted(elements[:k]))
-    # if the "k"th element is ranked lower than left we call recursion on the left side of our elements
-    elif k < left:
-        return QS(elements[0:left], k)
-    # if the "k"th element is ranked higher than left we call recursion on the right side of our elements
-    # we also need to take the "k"th place into mind when we choose from this side is the ranks under it are now gone
+def increment():
+    global COUNT
+    COUNT = COUNT + 1
+
+
+def reset():
+    global COUNT
+    COUNT = 0
+
+
+####################################################################################################
+####################################################################################################
+# Given an array A=ka1,a2,···,anl of non-zero real numbers, the problem is to nd a
+# subarray kai,ai+1,···,aj l (of consecutive elements) such that the sum of all the numbers
+# in this subarray is maximum over all possible consecutive subarrays. Design a divide and
+# conquer algorithm to compute such a maximum sum. You do not need to actually output
+# such a subarray; only returning the maximum sum. Write only one recursive function to
+# implement your algorithm. Built-in functions or methods for strings or lists must not be
+# used. Your algorithm should run in O(n)time in the worst case. You may assume that
+# n=2k for some positive integer k.
+####################################################################################################
+####################################################################################################
+
+
+def max_subarray(array):
+    # If the array length is 1, we return the only element
+    # and assign it to all variables, max left, max right, max sum and total max
+    if len(array) == 1:
+        return [array[0], array[0], array[0], array[0]]  # all vars in Sum is set to the single elements value
     else:
-        if k >= i:
-            return tuple(sorted(elements[:k]))
-        return QS(elements[left:len(elements)], k - left)
+
+        # find the middle of the list
+        #        ↓ this is the pivot
+        # +---+---+---+---+
+        # | 1 | 2 | 3 | 4 |
+        # +---+---+---+---+
+        mid = len(array) // 2
+
+        left_list = array[:mid]
+        right_list = array[mid:]
+
+        # +---+---+     +---+---+
+        # | 1 | 2 |     | 3 | 4 |
+        # +---+---+     +---+---+
+        # We split the list
+        # into two parts, left and right
+        # and recursively call the function on each of them
+        left = max_subarray(left_list)
+        right = max_subarray(right_list)
+
+        left_max_left = left[0]
+        left_max_right = left[1]
+        left_total_sum = left[2]
+        left_max_sum = left[3]
+
+        right_max_left = right[0]
+        right_max_right = right[1]
+        right_total_sum = right[2]
+        right_max_sum = right[3]
+
+        # Total sum The sum of all elements in the array
+        total_sum = left_max_sum + right_max_sum
+
+        # Max left sum
+        # The sum of all elements in the left subarray
+        # if max sum left side is greater than the sum of all elements in the sub array + right side max left
+        if left_max_left > left_total_sum + right_max_left:
+            max_left = left_max_left
+        else:
+            max_left = left_total_sum + right_max_left
+
+        # Max right sum
+        # The sum of all elements in the right subarray
+        # if max sum right side is greater than the sum of all elements in the sub array + left side max right
+        if right_max_right > right_total_sum + left_max_right:
+            max_right = right_max_right
+        else:
+            max_right = right_total_sum + left_max_right
+
+        # Max sum
+        # The maximum sum of all possible sub arrays
+        # if the max sum left side is greater than the max sum right side
+        if (right_max_sum > left_max_sum) and (right_max_sum > left_max_right + right_max_left):
+            max_sum = right_max_sum
+        elif (left_max_sum > right_max_sum) and (left_max_sum > left_max_right + right_max_left):
+            max_sum = left_max_sum
+        else:
+            max_sum = left_max_right + right_max_left
+
+        # Return an array of all our different variables.
+        return [max_left, max_right, total_sum, max_sum]
 
 
 if __name__ == '__main__':
     randomlist = []
-    amountofelems = 3*2**10 # assuming n = 3*2^k as in the lab spec
-    randomlist = random.sample(range(0, amountofelems*10), amountofelems)
 
-    randomlist2 = []
-    amountofelems = 2**4
-    for i in range(0, amountofelems):
-        n = random.randint(-amountofelems*10, amountofelems*10)
-        randomlist2.append(n)
+    k = 3 * 2 ** 0
+    print('n value: ' + str(k))
 
-    #print(randomlist)
-    start_time = time.time()
-    print("Incremental > ", incremental(randomlist))
-    print("it took: ", (time.time()-start_time), "seconds for incr")
 
-    start_time = time.time()
-    print("Div and Conq qs > ", QS(randomlist, 3))
-    print("it took: ", (time.time()-start_time), "seconds for qs")
+    def predictioninc(k):
+        return 3 * 2 + 2 + (k - 3) * 3
 
-    '''print(randomlist2)
-    start_time = time.time()
-    print(maxSubArrSum(randomlist2))
-    print("it took: ", (time.time()-start_time), "seconds for max sum")'''
+
+    def predictiondiv(k):
+        return 2 * (k / 2) + 2 * (3 * 2 + 2 + (k - 3) * 3)
+
+
+    print('prediction increment: ' + str(predictioninc(k)))
+    print('prediction divconq: ' + str(predictiondiv(k)))
+    for i in range(0, k):
+        n = random.randint(1, 100)
+        randomlist.append(n)
+    # print(randomlist)
+    print(incremental(randomlist))
+    print(COUNT)
+    reset()
+    print(divnconq(randomlist))
+    print(COUNT)
+    reset()
