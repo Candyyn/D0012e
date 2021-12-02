@@ -87,8 +87,8 @@ def QS(elements, k):
     # if the rank of the pivot is the withing the ranks 1-3 we return our
     if k == left:
         a = elements[:k][0]
-        b = elements[k:][1]
-        c = elements[k:][2]
+        b = elements[:k][1]
+        c = elements[:k][2]
 
         if a > b:
             a, b = b, a
@@ -104,10 +104,10 @@ def QS(elements, k):
     # if the "k"th element is ranked higher than left we call recursion on the right side of our elements
     # we also need to take the "k"th place into mind when we choose from this side is the ranks under it are now gone
     else:
-        if k >= i:
+        if k >= i and len(elements[:k]) > 2:
             a = elements[:k][0]
-            b = elements[k:][1]
-            c = elements[k:][2]
+            b = elements[:k][1]
+            c = elements[:k][2]
 
             if a > b:
                 a, b = b, a
@@ -118,6 +118,65 @@ def QS(elements, k):
 
             return a, b, c
         return QS(elements[left:len(elements)], k - left)
+
+
+# Given an array A=ka1,a2,···,anl of non-zero real numbers, the problem is to nd a
+# subarray kai,ai+1,···,aj l (of consecutive elements) such that the sum of all the numbers
+# in this subarray is maximum over all possible consecutive subarrays. Design a divide and
+# conquer algorithm to compute such a maximum sum. You do not need to actually output
+# such a subarray; only returning the maximum sum. Write only one recursive function to
+# implement your algorithm. Built-in functions or methods for strings or lists must not be
+# used. Your algorithm should run in O(n)time in the worst case. You may assume that
+# n=2k for some positive integer k.
+def max_subarray(A, i, j):
+    # base case
+    if i == j:
+        return A[i]
+
+    # find the middle of the array
+    mid = (i + j) // 2
+
+    # find the maximum sum of the left subarray
+    max_left = max_subarray(A, i, mid)
+
+    # find the maximum sum of the right subarray
+    max_right = max_subarray(A, mid + 1, j)
+
+    # find the maximum sum of the crossing subarray
+    max_cross = max_crossing_subarray(A, i, mid, j)
+
+    # return the maximum of the three
+    return max(max_left, max_right, max_cross)
+
+
+def max_crossing_subarray(A, i, mid, j):
+    # find the maximum sum of the crossing subarray
+    max_left = -float('inf')
+
+    sum = 0
+    # find the maximum sum of the left subarray
+    for k in range(mid, i - 1, -1):
+        # add the current element to the sum
+        sum += A[k]
+        # if the sum is greater than the current max left we update it
+        if sum > max_left:
+            # update the max left
+            max_left = sum
+
+    # find the maximum sum of the right subarray
+    max_right = -float('inf')
+    sum = 0
+
+    for k in range(mid + 1, j + 1):
+        # add the current element to the sum
+        sum += A[k]
+        # if the sum is greater than the current max right we update it
+        if sum > max_right:
+            # update the max right
+            max_right = sum
+
+    # return the maximum of the three
+    return max_left + max_right
 
 
 if __name__ == '__main__':
@@ -139,6 +198,12 @@ if __name__ == '__main__':
     start_time = time.time()
     print("Div and Conq qs > ", QS(randomlist, 3))
     print("it took: ", (time.time() - start_time), "seconds for qs")
+
+
+    test = [2,7,-4,2,1,1]
+    # test max subarray
+    print(max_subarray(test, 0, len(test) - 1))
+
 
     '''print(randomlist2)
     start_time = time.time()
