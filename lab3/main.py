@@ -7,9 +7,29 @@ class node:
         self.left = None
         self.right = None
         self.size = 0
+        self.leftCount = 0
+        self.rightCount = 0
 
-    def add(self):
-        self.size += 1
+    def getSize(self):
+        return self.size
+
+    def updateSize(self):  # sums the size of the nodes below it
+        temp = 1
+        if self.left is not None:
+            temp += self.left.getSize()
+
+        if self.right is not None:
+            temp += self.right.getSize()
+
+        self.size = temp
+
+    def addleft(self):
+        self.leftCount += 1
+        self.updateSize()
+
+    def addright(self):
+        self.rightCount += 1
+        self.updateSize()
 
     # Display code from: https://stackoverflow.com/a/54074933
     def display(self):
@@ -63,26 +83,95 @@ class node:
         return lines, n + m + u, max(p, q) + 2, n + u // 2
 
 
+def isPerfectRec(root, d, level=0):
+    # An empty tree is perfect
+    if (root == None):
+        return True
+
+    # If leaf node, then its depth must
+    # be same as depth of all other leaves.
+    if root.left == None and root.right == None:
+        return (d == level + 1)
+
+    # If internal node and one child is empty
+    if (root.left == None or root.right == None):
+        return False
+
+    # Left and right subtrees must be perfect.
+    return (isPerfectRec(root.left, d, level + 1) and
+            isPerfectRec(root.right, d, level + 1))
+
+
+# Wrapper over isPerfectRec()
+def isPerfect(root):
+    d = findADepth(root)
+    return isPerfectRec(root, d)
+
+
+def findADepth(node):
+    d = 0
+    while (node != None):
+        d += 1
+        node = node.left
+    return d
+
+
+def height(root):
+    # Check if the binary tree is empty
+    if root is None:
+        # If TRUE return 0
+        return 0
+        # Recursively call height of each node
+    leftAns = height(root.left)
+    rightAns = height(root.right)
+
+    # Return max(leftHeight, rightHeight) at each iteration
+    return max(leftAns, rightAns) + 1
+
+
 def insert(root, data, c):  # O(n)
     if root is None:
         root = node(data, c)
     else:
         if data <= root.data:
-            root.left = insert(root.left, data, c)
-            root.add()
+            if True:
+            #if root.leftCount <= (root.rightCount + root.leftCount) * c:
+                root.left = insert(root.left, data, c)
+                root.addleft()
         else:
-            root.right = insert(root.right, data, c)
-            root.add()
+            if True:
+            #if root.rightCount <= (root.rightCount + root.leftCount) * c:
+                root.right = insert(root.right, data, c)
+                root.addright()
     return root
+
+
+def inordertraversal(root):
+    datatraversed = []
+    if root:
+        datatraversed = inordertraversal(root.left)
+        datatraversed.append(root.data)
+        datatraversed = datatraversed + inordertraversal(root.right)
+    return datatraversed
 
 
 if __name__ == '__main__':
     print('Binary Search Tree')
 
     c = 0.5
+    maxheight = 2
+    elements = (2 ** maxheight) - 1
+    print(elements)
+    test = node(5, c)
+    for i in range(elements - 1):
+        root = insert(test, random.randint(0, 10), c)
 
-    test = node(50, c)
-    for _ in range(10):
-        insert(test, random.randint(0, 100), c)
-
+    print('#' * 60)
+    print('Variables: \t')
+    print('c:                       \t', c)
+    print('Max Subtree height:      \t', (test.rightCount + test.leftCount) * c)
+    print('Height of the tree:      \t', height(test))
+    print('Size:                    \t', test.size)
+    print('Is perfectly balanced?   \t', isPerfect(test))
+    print('#' * 60)
     test.display()
