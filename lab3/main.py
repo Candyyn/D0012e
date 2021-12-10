@@ -2,10 +2,14 @@ import random
 
 
 class node:
-    def __init__(self, data):
+    def __init__(self, data, c):
         self.data = data
         self.left = None
         self.right = None
+        self.size = 0
+
+    def add(self):
+        self.size += 1
 
     # Display code from: https://stackoverflow.com/a/54074933
     def display(self):
@@ -17,7 +21,7 @@ class node:
         """Returns list of strings, width, height, and horizontal coordinate of the root."""
         # No child.
         if self.right is None and self.left is None:
-            line = '%s' % self.data
+            line = '%s' % self.data + ' (' + str(self.size) + ')'
             width = len(line)
             height = 1
             middle = width // 2
@@ -26,7 +30,7 @@ class node:
         # Only left child.
         if self.right is None:
             lines, n, p, x = self.left._display_aux()
-            s = '%s' % self.data
+            s = '%s' % self.data + ' (' + str(self.size) + ')'
             u = len(s)
             first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s
             second_line = x * ' ' + '/' + (n - x - 1 + u) * ' '
@@ -36,7 +40,7 @@ class node:
         # Only right child.
         if self.left is None:
             lines, n, p, x = self.right._display_aux()
-            s = '%s' % self.data
+            s = '%s' % self.data + ' (' + str(self.size) + ')'
             u = len(s)
             first_line = s + x * '_' + (n - x) * ' '
             second_line = (u + x) * ' ' + '\\' + (n - x - 1) * ' '
@@ -46,7 +50,7 @@ class node:
         # Two children.
         left, n, p, x = self.left._display_aux()
         right, m, q, y = self.right._display_aux()
-        s = '%s' % self.data
+        s = '%s' % self.data + ' (' + str(self.size) + ')'
         u = len(s)
         first_line = (x + 1) * ' ' + (n - x - 1) * '_' + s + y * '_' + (m - y) * ' '
         second_line = x * ' ' + '/' + (n - x - 1 + u + y) * ' ' + '\\' + (m - y - 1) * ' '
@@ -59,22 +63,26 @@ class node:
         return lines, n + m + u, max(p, q) + 2, n + u // 2
 
 
-def insert(root, data):  # O(n)
+def insert(root, data, c):  # O(n)
     if root is None:
-        root = node(data)
+        root = node(data, c)
     else:
         if data <= root.data:
-            root.left = insert(root.left, data)
+            root.left = insert(root.left, data, c)
+            root.add()
         else:
-            root.right = insert(root.right, data)
+            root.right = insert(root.right, data, c)
+            root.add()
     return root
 
 
 if __name__ == '__main__':
     print('Binary Search Tree')
 
-    test = node(50)
-    for _ in range(50):
-        insert(test, random.randint(0, 100))
+    c = 0.5
+
+    test = node(50, c)
+    for _ in range(10):
+        insert(test, random.randint(0, 100), c)
 
     test.display()
