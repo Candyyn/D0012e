@@ -1,9 +1,13 @@
+import random
+
+
 class node:
     def __init__(self, data):
         self.data = data
         self.left = None
         self.right = None
 
+    # Display code from: https://stackoverflow.com/a/54074933
     def display(self):
         lines, *_ = self._display_aux()
         for line in lines:
@@ -66,23 +70,11 @@ def insert(root, data):  # O(n)
     return root
 
 
-def displayAll(root):
-    if root:
-        print('left ')
-        displayAll(root.left)
-        print(root.data)
-        print('right ')
-        displayAll(root.right)
-
-
 if __name__ == '__main__':
     print('Binary Search Tree')
 
-    test = node(10)
-    test = insert(test, 3)
-    test = insert(test, 11)
-    test = insert(test, 2)
-    test = insert(test, 15)
-    test = insert(test, 1)
+    test = node(50)
+    for _ in range(50):
+        insert(test, random.randint(0, 100))
 
     test.display()
