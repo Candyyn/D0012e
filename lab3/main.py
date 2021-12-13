@@ -28,11 +28,13 @@ class node:
                     placed = self.left.insert(value)
                     if placed:
                         self.size += 1
+                        return True
 
                 elif self.left.size < 0.5 * self.size:
                     placed = self.left.insert(value)
                     if placed:
                         self.size += 1
+                        return True
 
                 else:
                     traversed = self.inordertraversal()
@@ -56,11 +58,13 @@ class node:
                     placed = self.right.insert(value)
                     if placed:
                         self.size += 1
+                        return True
 
                 elif self.right.size < 0.5 * self.size:
                     placed = self.right.insert(value)
                     if placed:
                         self.size += 1
+                        return True
 
                 else:
                     traversed = self.inordertraversal()
