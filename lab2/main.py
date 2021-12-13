@@ -1,67 +1,4 @@
 import random
-import time
-import matplotlib.pyplot as plt
-
-
-##################
-# Help Functions
-##################
-
-def default_mergeSort(arr):
-    if len(arr) > 1:  # If the array is bigger then 1
-        mid = len(arr) // 2  # Find the middle element
-        left = arr[:mid]  # Get the left half
-        right = arr[mid:]  # Get the right half
-
-        default_mergeSort(left)  # Sort the left half
-
-        default_mergeSort(right)  # Sort the right half
-
-        i = j = k = 0  # Initialize the indexes
-
-        while i < len(left) and j < len(right):
-            if left[i] < right[j]:  # If the left element is smaller then the right
-                arr[k] = left[i]  # Insert the left element
-                i += 1  # Increment the left index
-            else:
-                arr[k] = right[j]  # Insert the right element
-                j += 1  # Increment the right index
-            k += 1  # Increment the index
-
-        while i < len(left):
-            arr[k] = left[i]  # Insert the left elements
-            i += 1  # Increment the left index
-            k += 1  # Increment the index
-
-        while j < len(right):
-            arr[k] = right[j]  # Insert the right elements
-            j += 1  # Increment the right index
-            k += 1  # Increment the index
-    return arr  # Return the sorted array
-
-
-# function to show the plot
-def plotFunction(func, tests=10):
-    _time = []
-    _elements = []
-    for i in range(0, tests):
-        amount_of_elements = 3 * 2 ** i  # assuming n = 3*2^k as in the lab spec
-        random_list = random.sample(range(-amount_of_elements * 100, amount_of_elements * 100), amount_of_elements)
-        _elements.append(len(random_list))
-
-        # Plot Time length
-        start_time = time.time()
-        func(random_list)
-        _time.append(time.time() - start_time)
-
-    plt.plot(_elements, _time, label='test')
-    plt.xlabel('Elements')
-
-    plt.ylabel('Time (s)')
-
-    plt.title(func.__name__)
-    plt.legend()
-    plt.show()
 
 
 ####################################################################################################
@@ -79,42 +16,60 @@ def plotFunction(func, tests=10):
 def incremental(elements):
     smallestlist = []  # list that will hold the 3 smallest elements
     biggestsmallest = None  # the biggest of the 3 smallest elements
-
-    for i in range(0, len(elements)):  # step through the list incrementally
-
-        if len(smallestlist) < 3:  # fill up the list to begin with     +3
+    for i in range(0, len(elements)):
+        increment()
+        if len(smallestlist) < 3:  # fill up the list to begin with
             smallestlist.append(elements[i])
-            if biggestsmallest is None or biggestsmallest < elements[i]:  # +3
+            increment()
+            if biggestsmallest is None or biggestsmallest < elements[i]:
                 biggestsmallest = elements[i]  # set biggest element
+        elif biggestsmallest > elements[i]:  # if an element smaller than the biggest element in our set of 3 we need
+            # to swap
+            increment()
 
-        # n-3
-        elif biggestsmallest > elements[i]:  # if an element smaller than the biggest element in our set of 3 we need to swap
+        elif biggestsmallest > elements[
+            i]:  # if an element smaller than the biggest element in our set of 3 we need to swap
             biggestsmallest = elements[i]  # prematurely set the biggest element to the new one
 
             for j in range(0,
                            len(smallestlist)):  # step through the smallest element list to find which value needs to go
 
                 # 3*(n-3)
+                increment()
                 if smallestlist[j] > biggestsmallest:
                     biggestsmallest, smallestlist[j] = smallestlist[j], biggestsmallest
 
     for i in range(0, 2):  # +3
+        increment()
         if smallestlist[i] > smallestlist[i + 1]:
             smallestlist[i], smallestlist[i + 1] = smallestlist[i + 1], smallestlist[i]
 
     return tuple(smallestlist)
 
 
-def divnconq(elements, k):
+def divnconq(elements, k=3):
+    increment()
     if len(elements) < k:  # +1
         return elements
 
-    left = divnconq(elements[:len(elements) // 2], k)  # +T(n/2)
-    right = divnconq(elements[len(elements) // 2:], k)  # +T(n/2)
+    left = divnconq(elements[:len(elements) // 2], k)  # +T(n//2)
+    right = divnconq(elements[len(elements) // 2:], k)  # +T(n//2)
     smallestelems = incremental(left + right)  # F(n)
 
     return incremental(smallestelems)
 
+
+COUNT = 0
+
+
+def increment():
+    global COUNT
+    COUNT = COUNT + 1
+
+
+def reset():
+    global COUNT
+    COUNT = 0
 
 
 ####################################################################################################
@@ -201,5 +156,29 @@ def max_subarray(array):
 
 
 if __name__ == '__main__':
-    print('max value, subarray: ', max_subarray([-2, 2,3, -4])[3])
-    #plotFunction(max_subarray)
+    randomlist = []
+
+    k = 3 * 2 ** 0
+    print('n value: ' + str(k))
+
+
+    def predictioninc(k):
+        return 3 * 2 + 2 + (k - 3) * 3
+
+
+    def predictiondiv(k):
+        return 2 * (k / 2) + 2 * (3 * 2 + 2 + (k - 3) * 3)
+
+
+    print('prediction increment: ' + str(predictioninc(k)))
+    print('prediction divconq: ' + str(predictiondiv(k)))
+    for i in range(0, k):
+        n = random.randint(1, 100)
+        randomlist.append(n)
+    # print(randomlist)
+    print(incremental(randomlist))
+    print(COUNT)
+    reset()
+    print(divnconq(randomlist))
+    print(COUNT)
+    reset()
