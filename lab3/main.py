@@ -19,22 +19,27 @@ class node:
         if self.value is None:
             self.value = value
             self.size += 1
+            return True
         else:
             if value < self.value:
 
                 if self.left is None:
                     self.left = node()
-                    self.left.insert(value)
-                    self.size += 1
+                    placed = self.left.insert(value)
+                    if placed:
+                        self.size += 1
 
                 elif self.left.size < 0.5 * self.size:
-                    self.left.insert(value)
-                    self.size += 1
+                    placed = self.left.insert(value)
+                    if placed:
+                        self.size += 1
 
                 else:
                     traversed = self.inordertraversal()
                     originLen = len(traversed)
                     for i in range(0, len(traversed)):
+                        if value == traversed[i]:
+                            return False
                         if value < traversed[i]:
                             traversed = traversed[:i] + [value] + traversed[i:]
                             break
@@ -48,17 +53,21 @@ class node:
 
                 if self.right == None:
                     self.right = node()
-                    self.right.insert(value)
-                    self.size += 1
+                    placed = self.right.insert(value)
+                    if placed:
+                        self.size += 1
 
                 elif self.right.size < 0.5 * self.size:
-                    self.right.insert(value)
-                    self.size += 1
+                    placed = self.right.insert(value)
+                    if placed:
+                        self.size += 1
 
                 else:
                     traversed = self.inordertraversal()
                     originLen = len(traversed)
                     for i in range(0, len(traversed)):
+                        if value == traversed[i]:
+                            return False
                         if value < traversed[i]:
                             traversed = traversed[:i] + [value] + traversed[i:]
                             break
@@ -66,9 +75,10 @@ class node:
                         traversed = traversed + [value]
                     self.left = None
                     self.right = None
+
                     self.balance(traversed)
             else:  # if the insertion value is the same as a value already found we do not insert
-                return
+                return False
 
     def inordertraversal(self):
         datatraversed = []
@@ -200,12 +210,12 @@ if __name__ == '__main__':
     print('Binary Search Tree')
 
     c = 0.5
-    maxheight = 3
+    maxheight = 5
     elements = (2 ** maxheight) - 1
     print(elements)
     test = node()
     for i in range(elements):
-        test.insert(random.randint(0, 10))
+        test.insert(random.randint(0, elements*2))
 
     print('#' * 60)
     print('Variables: \t')
