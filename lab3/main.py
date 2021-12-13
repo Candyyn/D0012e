@@ -2,11 +2,12 @@ import random
 
 
 class node:
-    def __init__(self):
+    def __init__(self, c):
         self.value = None
         self.left = None
         self.right = None
-        self.size = 0
+        self.size = 1
+        self.c = c
 
     def display(self):
         if self.left:
@@ -16,6 +17,7 @@ class node:
             self.right.display()
 
     def insert(self, value):
+        print('size: ', self.size, 'value: ', self.value)
         if self.value is None:
             self.value = value
             self.size += 1
@@ -24,13 +26,13 @@ class node:
             if value < self.value:
 
                 if self.left is None:
-                    self.left = node()
+                    self.left = node(self.c)
                     placed = self.left.insert(value)
                     if placed:
                         self.size += 1
                         return True
 
-                elif self.left.size < 0.5 * self.size:
+                elif self.left.size < self.c * self.size:
                     placed = self.left.insert(value)
                     if placed:
                         self.size += 1
@@ -54,13 +56,13 @@ class node:
             elif value > self.value:
 
                 if self.right == None:
-                    self.right = node()
+                    self.right = node(self.c)
                     placed = self.right.insert(value)
                     if placed:
                         self.size += 1
                         return True
 
-                elif self.right.size < 0.5 * self.size:
+                elif self.right.size < self.c * self.size:
                     placed = self.right.insert(value)
                     if placed:
                         self.size += 1
@@ -99,10 +101,10 @@ class node:
         left = values[:len(values) // 2]
         right = values[len(values) // 2 + 1:]
         if len(left) > 0:
-            self.left = node()
+            self.left = node(self.c)
             self.left.balance(left)
         if len(right) > 0:
-            self.right = node()
+            self.right = node(self.c)
             self.right.balance(right)
 
     # Display code from: https://stackoverflow.com/a/54074933
@@ -171,26 +173,6 @@ def height(root):
     else:
         return hright + 1
 
-
-def CheckBalancedBinaryTree(root):
-    # if tree is empty,return True
-    if root == None:
-        return True
-    # check height of left subtree
-    lheight = height(root.left)
-    rheight = height(root.right)
-    # if difference in height is greater than 1, return False
-    if (abs(lheight - rheight) > 1):
-        return False
-    # check if left subtree is balanced
-    lcheck = CheckBalancedBinaryTree(root.left)
-    # check if right subtree is balanced
-    rcheck = CheckBalancedBinaryTree(root.right)
-    # if both subtree are balanced, return True
-    if lcheck == True and rcheck == True:
-        return True
-
-
 def CheckBalancedBinaryTree(root):
     # if tree is empty,return True
     if root == None:
@@ -214,10 +196,10 @@ if __name__ == '__main__':
     print('Binary Search Tree')
 
     c = 0.5
-    maxheight = 5
+    maxheight = 3
     elements = (2 ** maxheight) - 1
     print(elements)
-    test = node()
+    test = node(c)
     for i in range(elements):
         test.insert(random.randint(0, elements*2))
 
@@ -225,17 +207,65 @@ if __name__ == '__main__':
     print('Variables: \t')
     print('c:                       \t', c)
     print('Size:                    \t', test.size)
+    print('height:                    \t', height(test))
     print('balanced:                \t', CheckBalancedBinaryTree(test))
     print('#' * 60)
     test.display()
 
-    for i in range(1000):
-        maxheight = 5
-        elements = (2 ** maxheight) - 1
-        testing = node()
-        for j in range(elements):
-            testing.insert(random.randint(0, 100))
+    test1=[]
+    test2=[]
+    test3=[]
+    test4=[]
+    for i in range(0):
+        if i == 0:
+            for j in range(1000):
+                c = 0.5
+                maxheight = 5
+                elements = (2 ** maxheight) - 1
+                testing = node(c)
+                for z in range(elements):
+                    testing.insert(random.randint(0, 100))
 
-        if not CheckBalancedBinaryTree(testing):
-            print('not balanced')
-            break
+                if not CheckBalancedBinaryTree(testing):
+                    test1.append('not balanced')
+        if i == 1:
+            for j in range(1000):
+                c = 0.6
+                maxheight = 5
+                elements = (2 ** maxheight) - 1
+                testing = node(c)
+                for z in range(elements):
+                    testing.insert(random.randint(0, 100))
+
+                if not CheckBalancedBinaryTree(testing):
+                    test2.append('not balanced')
+        if i == 2:
+            for j in range(1000):
+                c = 0.8
+                maxheight = 5
+                elements = (2 ** maxheight) - 1
+                testing = node(c)
+                for z in range(elements):
+                    testing.insert(random.randint(0, 100))
+
+                if not CheckBalancedBinaryTree(testing):
+                    test3.append('not balanced')
+        if i == 3:
+            for j in range(1000):
+                c = 1
+                maxheight = 5
+                elements = (2 ** maxheight) - 1
+                testing = node(c)
+                for z in range(elements):
+                    testing.insert(random.randint(0, 100))
+
+                if not CheckBalancedBinaryTree(testing):
+                    test4.append('not balanced')
+
+    print('c = 0.5 Fel:', len(test1) / 10, '%')
+    print('c = 0.6 Fel:', len(test2) / 10, '%')
+    print('c = 0.8 Fel:', len(test3) / 10, '%')
+    print('c = 1   Fel:', len(test4) / 10, '%')
+
+
+
