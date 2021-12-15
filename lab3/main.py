@@ -1,4 +1,7 @@
 import random
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import time
 
 
 class node:
@@ -12,12 +15,10 @@ class node:
     def display(self):
         if self.left:
             self.left.display()
-        print(self.value, self.size)
         if self.right:
             self.right.display()
 
     def insert(self, value):
-        print('size: ', self.size, 'value: ', self.value)
         if self.value is None:
             self.value = value
             self.size += 1
@@ -32,7 +33,7 @@ class node:
                         self.size += 1
                         return True
 
-                elif self.left.size < self.c * self.size:
+                elif self.left.size > self.c * self.size:
                     placed = self.left.insert(value)
                     if placed:
                         self.size += 1
@@ -62,7 +63,7 @@ class node:
                         self.size += 1
                         return True
 
-                elif self.right.size < self.c * self.size:
+                elif self.right.size > self.c * self.size:
                     placed = self.right.insert(value)
                     if placed:
                         self.size += 1
@@ -173,9 +174,10 @@ def height(root):
     else:
         return hright + 1
 
+
 def CheckBalancedBinaryTree(root):
     # if tree is empty,return True
-    if root == None:
+    if root is None:
         return True
     # check height of left subtree
     lheight = height(root.left)
@@ -196,12 +198,12 @@ if __name__ == '__main__':
     print('Binary Search Tree')
 
     c = 0.5
-    maxheight = 3
+    maxheight = 7
     elements = (2 ** maxheight) - 1
     print(elements)
     test = node(c)
     for i in range(elements):
-        test.insert(random.randint(0, elements*2))
+        test.insert(random.randint(0, elements * 2))
 
     print('#' * 60)
     print('Variables: \t')
@@ -212,15 +214,15 @@ if __name__ == '__main__':
     print('#' * 60)
     test.display()
 
-    test1=[]
-    test2=[]
-    test3=[]
-    test4=[]
+    test1 = []
+    test2 = []
+    test3 = []
+    test4 = []
     for i in range(0):
         if i == 0:
             for j in range(1000):
-                c = 0.5
-                maxheight = 5
+                c = 0.55
+                maxheight = 10
                 elements = (2 ** maxheight) - 1
                 testing = node(c)
                 for z in range(elements):
@@ -229,7 +231,7 @@ if __name__ == '__main__':
                 if not CheckBalancedBinaryTree(testing):
                     test1.append('not balanced')
         if i == 1:
-            for j in range(1000):
+            for j in range(10000):
                 c = 0.6
                 maxheight = 5
                 elements = (2 ** maxheight) - 1
@@ -240,7 +242,7 @@ if __name__ == '__main__':
                 if not CheckBalancedBinaryTree(testing):
                     test2.append('not balanced')
         if i == 2:
-            for j in range(1000):
+            for j in range(10000):
                 c = 0.8
                 maxheight = 5
                 elements = (2 ** maxheight) - 1
@@ -251,7 +253,7 @@ if __name__ == '__main__':
                 if not CheckBalancedBinaryTree(testing):
                     test3.append('not balanced')
         if i == 3:
-            for j in range(1000):
+            for j in range(10000):
                 c = 1
                 maxheight = 5
                 elements = (2 ** maxheight) - 1
@@ -262,10 +264,73 @@ if __name__ == '__main__':
                 if not CheckBalancedBinaryTree(testing):
                     test4.append('not balanced')
 
-    print('c = 0.5 Fel:', len(test1) / 10, '%')
-    print('c = 0.6 Fel:', len(test2) / 10, '%')
-    print('c = 0.8 Fel:', len(test3) / 10, '%')
-    print('c = 1   Fel:', len(test4) / 10, '%')
+    _c = []
+    _corr = []
+    correct = []
+    for i in range(0, 100):
+        c = 0.5 + (0.005 * i)
+        _c.append(c)
+        _corr = []
+        for j in range(100):
+            maxheight = 7
+            elements = (2 ** maxheight) - 1
+            plot = node(c)
+            sample = random.sample(range(0, 50000), elements)
+            for z in range(elements):
+                plot.insert(sample[z])
 
+            if CheckBalancedBinaryTree(plot):
+                _corr.append(1)
+        correct.append((len(_corr) / 100) * 100)
 
+    plt.plot(_c, correct)
+    plt.ylabel('in %')
+    plt.xlabel('c variable')
+    plt.title('c variable vs. correct ( unique sample ) with 100 trials')
+    plt.show()
 
+    _c2 = []
+    _time = []
+    for i in range(90, 0, -1):
+        c = 0.50 + (0.005*i)
+        _c2.append(c)
+        for j in range(1):
+            maxheight = 7 * (j)
+            elements = (2 ** maxheight) - 1
+            sample = random.sample(range(0, 50000), elements)
+            start = time.time()
+            plot = node(c)
+            for z in range(elements):
+                plot.insert(sample[z])
+            end = time.time()
+            _time.append(end - start)
+
+    plt.plot(_c2, _time)
+    plt.ylabel('time')
+    plt.xlabel('c variable')
+    plt.title('c variable vs. time ( unique sample of 2^7-1  ) with 90 trials')
+    plt.show()
+
+    _time2 = []
+    _elemens2 = []
+    for i in range(0, 90):
+        c = 0.6
+        for j in range(4):
+
+            maxheight = 3 + (1 * j)
+            elements = (2 ** maxheight) - 1
+
+            sample = random.sample(range(0, 50000), elements)
+            start = time.time()
+            plot = node(c)
+            for z in range(elements):
+                plot.insert(sample[z])
+            end = time.time()
+            _elemens2.append(elements)
+            _time2.append(end - start)
+
+    plt.scatter(_elemens2, _time2)
+    plt.ylabel('time')
+    plt.xlabel('elements')
+    plt.title('elements vs. time ( unique sample c = 0.6) with 90 trials')
+    plt.show()
