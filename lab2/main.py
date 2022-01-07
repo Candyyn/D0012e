@@ -16,33 +16,29 @@ import random
 def incremental(elements):
     smallestlist = []  # list that will hold the 3 smallest elements
     biggestsmallest = None  # the biggest of the 3 smallest elements
-    for i in range(0, len(elements)):
-        increment()
-        if len(smallestlist) < 3:  # fill up the list to begin with
-            smallestlist.append(elements[i])
-            increment()
-            if biggestsmallest is None or biggestsmallest < elements[i]:
-                biggestsmallest = elements[i]  # set biggest element
-        elif biggestsmallest > elements[i]:  # if an element smaller than the biggest element in our set of 3 we need
-            # to swap
-            increment()
 
-        elif biggestsmallest > elements[
-            i]:  # if an element smaller than the biggest element in our set of 3 we need to swap
+    # Base case k = 0, n = 3
+    for i in range(0,3):
+        smallestlist.append(elements[i])
+        if biggestsmallest is None or biggestsmallest < elements[i]:    # 3
+                biggestsmallest = elements[i]  # set biggest element
+
+    for i in range(3, len(elements)):
+
+        if biggestsmallest > elements[i]:  # if an element smaller than the biggest element in our set of 3 we need to swap   n-3
             biggestsmallest = elements[i]  # prematurely set the biggest element to the new one
 
-            for j in range(0,
-                           len(smallestlist)):  # step through the smallest element list to find which value needs to go
-
-                # 3*(n-3)
-                increment()
-                if smallestlist[j] > biggestsmallest:
+            for j in range(0,len(smallestlist)):  # step through the smallest element list to find which value needs to go      
+                if smallestlist[j] > biggestsmallest:                                                                       #   3
                     biggestsmallest, smallestlist[j] = smallestlist[j], biggestsmallest
+    ######### 3*(n-3) #######
 
-    for i in range(0, 2):  # +3
-        increment()
-        if smallestlist[i] > smallestlist[i + 1]:
-            smallestlist[i], smallestlist[i + 1] = smallestlist[i + 1], smallestlist[i]
+    for i in range(0,2): # 9
+        for j in range(1,3):
+            if smallestlist[i] > smallestlist[j]:
+                smallestlist[i], smallestlist[j] = smallestlist[j], smallestlist[i]
+
+    #### 3+3*(n-3)+9 = 12+3*(n-3)
 
     return tuple(smallestlist)
 
