@@ -44,15 +44,14 @@ def incremental(elements):
 
 
 def divnconq(elements, k=3):
-    increment()
-    if len(elements) < k:  # +1
-        return elements
+    if len(elements) == k:  # +13
+        return incremental(elements)
 
     left = divnconq(elements[:len(elements) // 2], k)  # +T(n//2)
     right = divnconq(elements[len(elements) // 2:], k)  # +T(n//2)
     smallestelems = incremental(left + right)  # F(n)
 
-    return incremental(smallestelems)
+    return smallestelems
 
 
 COUNT = 0
@@ -154,7 +153,7 @@ def max_subarray(array):
 if __name__ == '__main__':
     randomlist = []
 
-    k = 3 * 2 ** 0
+    k = 3 * 2 ** 2
     print('n value: ' + str(k))
 
 
